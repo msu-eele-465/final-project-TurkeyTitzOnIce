@@ -58,20 +58,33 @@ The UART and SPI connections are bi-directional and every other connection is un
 
 ## Software overview
 
+This is a very high level flowshart that does not include all of the necessary functions and interrupts due to them not being developed yet, rather it shows the general flow of what the code in the three microcontrollers will be doing throughout the runtime of the system. 
+
 ![Picture](flow.drawio.png)
 
-Discuss, at a high level, a concept of how your code will work. Include a *high-level* flowchart. This is a high-level concept that should concisely communicate the project's concept.
 
 ## Testing Procedure
 
-Briefly describe how you will test and verify that your project is a success. Think about how you will *demo* the final project. If you need extra equipment for the demo, be sure that you can either bring the equipment or convincingly simulate it. For example, if you want to build a system that uses CAN bus to interface with your car, you won't be able to bring your car into Cobleigh for the demo...
+The testing procedure will be as follows:
+
+**Step 1**
+
+Develope the code for the MSP430FR355 #1 to establish that the keypad provides the desired input, the RGB LED works as intended, and that the board is able to interface with and AD2 in UART.
+
+**Step 2**
+
+Adjust the previous code for the MSP430FR355 #2 to develope the UART connection between the two and ensure the functionality of the two boards and their communication.
+
+**Step 3**
+
+Develope the code for the MSP430FR311 and the MSP430FR355 #1 to establish a SPI connection and establish the LED Bar for displaying the Score of the game.
 
 
 ## Prescaler
 
 Desired Prescaler level: 
 
-- [ ] 100%
+- [x] 100%
 - [ ] 95% 
 - [ ] 90% 
 - [ ] 85% 
@@ -83,32 +96,39 @@ Desired Prescaler level:
 **Outline how you meet the requirements for your desired prescalar level**
 
 **The inputs to the system will be:**
-1.  Short description of input #1
-2.  
+1.  Keypads
+2.  UART Inputs
+3.  SPI Inputs
+4.  Difficulty Knob
 
 **The outputs of the system will be:**
-1.   Short description of output #1
-2. 
+1.  RGB LED
+2.  LED Bar
+3.  UART Outputs
+4.  SPI Outputs
+5.  HEX Display Circuits 
 
 **The project objective is**
 
-{text – 1 to 2 sentences}
+To create a game that two people can play with one another. One player will input a code that will be displayed on the others hex displays for an amount of time determined by the difficutly knob. The other player will then try to type in what the code was and if they get it correct they will get a point. The points will be displayed on the LED Bar and the game will end when one player gets 3 points.
 
 **The new hardware or software modules are:**
-1. Short description of new hardware or software module
-2. 
+1. LED Hex Display - utilizing a 4bit - 7 segment display decoder.
+2. SPI communication - Using SPI even though its something we have never learned.
 
 
 The Master will be responsible for:
 
-{text – 1 to 2 sentences}
+Controlling the entire game - transmitting keypad 1 inputs and keeping track of score and sending that to the scoreboard slave.
 
 The Slave(s) will be responsible for:
 
-{text – 1 to 2 sentences}
+Keypad 2 slave - Being the controller for the second player of the game
+
+Scoreboard slave - showing off the score on the LED Bar.
 
 
 
 ### Argument for Desired Prescaler
 
-Consider the guidelines presented in the lecture notes and convince the reviewers that this proposal meets the minimum requirements for your desired prescale level.
+Verbal.
