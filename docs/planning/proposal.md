@@ -9,25 +9,43 @@
 **Total System**
 This Embeded system will integrate two MSP430FR355 microcontrollers with each other communicating inputs each has to the other with UART. The Master will also communicate with a MSP430FR311 through SPI to update an LED bar. The purpose of the system is to play a matching game between two keypad inputs and keep track of the score on the LED bar.
 
+
 **MSP430FR355 #1**
+
 Output 1. UART connection to MSP430FR355 #2 to transmit data. This will transmit a collection of different pieces of data depending on the state of the game.
+
 Input 1. UART connection to MSP430FR355 #2 to recieve data. This will recieve a collection of different pieces of data depending on the state of the game.
+
 Output 2. SPI connection to MSP430FR311 to transmit data. This will be transmitting the score of the game to be displayed on the LED Bar.
+
 Input2. SPI connection to MSP430FR311 to recieve acknowledges to ensure the communication is working correctly.
+
 Output 3. HEX Display Circuit. This circuit will consist of a 4bit-7segment display decoder and will be driven by the MSP.
+
 Input 3. Keypad. The Keypad will be used to gather data from a human input which is what powers the game.
+
 Output 4. RGB LED. The RGB LED will be used to display the status of the game and the system.
 
-**MSP430FR350**
+
+**MSP430FR350 #2**
+
 Output 1. UART connection to MSP430FR355 #1 to transmit data. This will transmit a collection of different pieces of data depending on the state of the game.
+
 Input 1. UART connection to MSP430FR355 #1 to recieve data. This will recieve a collection of different pieces of data depending on the state of the game.
+
 Output 2. HEX Display Circuit. This circuit will consist of a 4bit-7segment display decoder and will be driven by the MSP.
+
 Input 2. Keypad. The Keypad will be used to gather data from a human input which is what powers the game.
+
 Output 3. RGB LED. The RGB LED will be used to display the status of the game and the system.
 
+
 **MSP430FR311**
+
 Output 1. SPI connection to MSP430FR355 #1 to transmit data. This will transmit acknowledges to ensure proper communication with the MSP.
+
 Input 1. SPI connection to MSP430FR355 #1 to recieve data. This will recieve a byte of data related to the "score" of the game to be displayed.
+
 Output 2. LED Bar. This will be to display the score of the game for the users to see while playing.
 
 
