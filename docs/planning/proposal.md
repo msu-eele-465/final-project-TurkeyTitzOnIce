@@ -51,7 +51,7 @@ Output 2. LED Bar. This will be to display the score of the game for the users t
 
 ## Hardware Setup
 
-![Picture](proposal.drawio.png)
+![Picture](Proposal.drawio.png)
 
 What hardware will you require? Provide a conceptual circuit diagram and/or block diagram to help the reviewers understand your proposal. Be sure to introduce and discuss your figures in the text.
 
