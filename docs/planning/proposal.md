@@ -58,6 +58,8 @@ The UART and SPI connections are bi-directional and every other connection is un
 
 ## Software overview
 
+![Picture](flow.drawio.png)
+
 Discuss, at a high level, a concept of how your code will work. Include a *high-level* flowchart. This is a high-level concept that should concisely communicate the project's concept.
 
 ## Testing Procedure
