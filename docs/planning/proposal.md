@@ -1,8 +1,8 @@
 # Final project proposal
 
-- [ ] I have reviewed the project guidelines.
-- [ ] I will be working alone on this project.
-- [ ] No significant portion of this project will be (or has been) used in other course work.
+- [Aids] I have reviewed the project guidelines.
+- [Aids] I will be working alone on this project.
+- [Aids] No significant portion of this project will be (or has been) used in other course work.
 
 ## Embedded System Description
 
@@ -51,9 +51,10 @@ Output 2. LED Bar. This will be to display the score of the game for the users t
 
 ## Hardware Setup
 
+The UART and SPI connections are bi-directional and every other connection is uni-directional. The Hex Display Circuit is composed of both a HEX display and a 4bit-7segment decoder. 
+
 ![Picture](Proposal.drawio.png)
 
-What hardware will you require? Provide a conceptual circuit diagram and/or block diagram to help the reviewers understand your proposal. Be sure to introduce and discuss your figures in the text.
 
 ## Software overview
 
