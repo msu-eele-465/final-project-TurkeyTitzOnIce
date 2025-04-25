@@ -1,7 +1,7 @@
 #include <driverlib.h>
 #include "hex.h"
-#include "intrinsics.h"
 #include "UART.h"
+#include "heartbeat.h"
 
 //UART variables
     char message [] = "Hello World ";
@@ -14,6 +14,7 @@ int main(void) {
 
     hex_init();
     uart_init();
+    HeartBeat_init();
 
     while(1)
     {
@@ -26,6 +27,20 @@ int main(void) {
 }
 
 
+
+
+//-----------ISRs-----------------
+
+
+//Heartbeat
+#pragma vector = TIMER0_B0_VECTOR
+__interrupt void ISR_TB0_CCR0(void)
+{
+    P6OUT ^= BIT6;
+}
+
+
+//Trigger Transmit
 #pragma vector = //instert interrupt flag here
 __interrupt void ISR_name(void){
     position = 0;
@@ -37,6 +52,8 @@ __interrupt void ISR_name(void){
 
 }
 
+
+//UART
 #pragma vector = EUSCI_A1_VECTOR
 __interrupt void ISR_EUSCI_A1(void){
     if(UCA1IFG & UCTXIFG){
