@@ -4,9 +4,10 @@
 #include "heartbeat.h"
 
 //UART variables
-    char message [] = "Hello World ";
+    char message [] = "0";
     int position;
     int i, j;
+    char recieved[] = " ";
 
 int main(void) {
     // Stop watchdog timer
@@ -18,14 +19,22 @@ int main(void) {
 
     while(1)
     {
-        for(position = 0; position < sizeof(message); position++){
-            UCA1TXBUF = message[position];
-            _delay_cycles(1000);
+        if(recieved == "0"){
+            P6OUT |= BIT6;
+        }else if(recieved == "1"){
+            P6OUT &= ~BIT6;
+        }else{
         }
-        _delay_cycles(100000);
     }
 }
 
+//----------Functions-------------
+void tx(void){
+    position = 0;
+    UCA1IE |= UCTXCPTIE;
+    UCA1IFG &= ~UCTXCPTIFG;
+    UCA1TXBUF = message[position];
+}
 
 
 
@@ -36,21 +45,9 @@ int main(void) {
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void ISR_TB0_CCR0(void)
 {
-    P6OUT ^= BIT6;
+    //P6OUT ^= BIT6;
 }
 
-
-//Trigger Transmit
-#pragma vector = //instert interrupt flag here
-__interrupt void ISR_name(void){
-    position = 0;
-    UCA1IE |= UCTXCPTIE;
-    UCA1IFG &= ~UCTXCPTIFG;
-    UCA1TXBUF = message[position];
-
-    //clear flag
-
-}
 
 
 //UART
@@ -68,7 +65,7 @@ __interrupt void ISR_EUSCI_A1(void){
     }
 
     if(UCA1IFG & UCRXIFG){
-        //value = UCA1RXBUF
+        recieved[0] = UCA1RXBUF;
 
         //Recieve clears on its own
     }
