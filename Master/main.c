@@ -5,6 +5,7 @@
 #include "heartbeat.h"
 #include "locale.h"
 #include "Keypad.h"
+#include "timer.h"
 
 //UART variables
     volatile char message[] = "1234";
@@ -26,6 +27,9 @@
     unsigned int theirScore = 0;
     unsigned int guess;
     char fullGuess[] = "    ";
+    bool displayed = false;
+    bool slaveDisplayed = false;
+    char theirGuess[] = "    ";
 
 
 //------------Functions-------------
@@ -42,6 +46,21 @@ void check_guess(void){
     }
 }
 
+void clear_display(void){
+    P1OUT = 15 << 4;
+    P5OUT = 15 << 1;
+    P6OUT = 15 | (P6OUT & 0b01000000);
+    P2OUT = 15;
+}
+
+void slave_display(void){
+    slaveDisplayed = true;
+}
+
+void get_guess(void){
+
+}
+
 int main(void) {
     // Stop watchdog timer
     WDTCTL = WDTPW | WDTHOLD;
@@ -49,6 +68,7 @@ int main(void) {
     HeartBeat_init();
     hex_init();
     uart_init();
+    timer_init();
 
     while(_read_keypad_char() != '#'){}         //Wait for Pound so signify start of game
     message = "STRT";
@@ -67,13 +87,13 @@ int main(void) {
                 while(_read_keypad_char() == typed){}  //Wait for the button to be released
                 if(count ==4){
                     count = 0;
-                    tx();
+                    slave_display()
                     isTurn = false;
                     P4OUT &= ~BIT7;
                 }
             }
-        }else{
-            if(recieved != "    "){
+        }else if(!isTurn){
+            if(recieved != "    " & displayed){
                 guess = _read_keypad_char();
                 if(guess != 'E'){
                     static unsigned int count;
@@ -100,9 +120,40 @@ int main(void) {
 
 //heartbeat
 #pragma vector = TIMER0_B0_VECTOR
-__interrupt void ISR_TB0_CCR0(void)
-{
+__interrupt void ISR_TB0_CCR0(void){
     P6OUT ^= BIT6;
+}
+
+//Digit Displays
+#pragma vector = TIMER1_B0_VECTOR
+__interrupt void ISR_TB1_CCR0(void){
+    static int changed;
+    if(slaveDisplayed){
+        tx();
+        slaveDisplayed = false;
+        changed = 1;
+    }else{
+        if(changed){
+            get_guess();
+            changed = 0;
+        }
+        message[0] = 15;
+        message[1] = 15;
+        message[2] = 15;
+        message[3] = 15;
+    }
+
+    static int toggle;
+    if(!toggle & recieved != "    "){
+        P1OUT = recieved[0] << 4;
+        P5OUT = recieved[1] << 1;
+        P6OUT = recieved[2] | (P6OUT & 0b01000000);
+        P2OUT = recieved[3];
+        toggle = 1;
+        displayed = true;
+    }else{
+        clear_display();
+    }
 }
 
 

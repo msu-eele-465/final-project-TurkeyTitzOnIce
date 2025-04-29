@@ -26,13 +26,9 @@ int main(void) {
     while(1)
     {
         P1OUT = recieved[0] << 4;
-        __delay_cycles(10);
         P5OUT = recieved[1] << 1;
-        __delay_cycles(10);
         P6OUT = recieved[2] | (P6OUT & 0b01000000);
-        __delay_cycles(10);
         P2OUT = recieved[3];
-        __delay_cycles(10);
 
         typed = _read_keypad_char();
         if(typed != 'E'){
