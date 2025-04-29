@@ -3,12 +3,13 @@
 #include "intrinsics.h"
 #include "UART.h"
 #include "heartbeat.h"
+#include "locale.h"
 
 //UART variables
-    volatile char message[] = "0";
+    volatile char message[] = "1234";
     int position;
     int i, j;
-    unsigned int messageSize = 1;
+    unsigned int messageSize = 4;
 
 int main(void) {
     // Stop watchdog timer
@@ -17,8 +18,6 @@ int main(void) {
     HeartBeat_init();
     hex_init();
     uart_init();
-
-    message[0] = '0';
 
     while(1)
     {
@@ -29,8 +28,8 @@ int main(void) {
 //------------Functions-------------
 void tx(void){
     position = 0;
-    UCA1IE |= UCTXCPTIE;
-    UCA1IFG &= ~UCTXCPTIFG;
+    UCA1IE |= UCTXIE;
+    UCA1IFG &= ~UCTXIFG;
     UCA1TXBUF = message[position];
 }
 
@@ -48,9 +47,15 @@ __interrupt void ISR_TB0_CCR0(void)
     static int toggle;
     if(toggle){
         message[0] = '1';
+        message[1] = '2';
+        message[2] = '3';
+        message[3] = '4';
         toggle = 0;
     }else{
-        message[0] = '0';
+        message[0] = '5';
+        message[1] = '6';
+        message[2] = '7';
+        message[3] = '8';
         toggle = 1;
     }
 
@@ -64,11 +69,11 @@ __interrupt void ISR_TB0_CCR0(void)
 __interrupt void ISR_EUSCI_A1(void){
     if(UCA1IFG & UCTXIFG){
         position++;
-
-        if(position < messageSize){
+        if(position <= messageSize - 1){
             UCA1TXBUF = message[position];
         }else{
-            UCA1IE &= ~UCTXCPTIE;  // All done sending, disable interrupt
+            UCA1IE &= ~UCTXIE;  // All done sending, disable interrupt
+            UCA1IFG &= ~UCTXIFG;
         }
 
         UCA1IFG &= ~UCTXCPTIFG;  // Clear TX complete flag

@@ -7,7 +7,7 @@
     char message [] = "0";
     int position;
     int i, j;
-    char recieved[] = " ";
+    char recieved[] = "    ";
 
 int main(void) {
     // Stop watchdog timer
@@ -19,12 +19,10 @@ int main(void) {
 
     while(1)
     {
-        if(recieved == "0"){
-            P6OUT |= BIT6;
-        }else if(recieved == "1"){
-            P6OUT &= ~BIT6;
-        }else{
-        }
+        P3OUT = recieved[0];
+        P5OUT = recieved[1] << 1;
+        P6OUT = recieved[2];
+        P2OUT = recieved[3];
     }
 }
 
@@ -45,7 +43,7 @@ void tx(void){
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void ISR_TB0_CCR0(void)
 {
-    //P6OUT ^= BIT6;
+    P6OUT ^= BIT6;
 }
 
 
@@ -65,8 +63,13 @@ __interrupt void ISR_EUSCI_A1(void){
     }
 
     if(UCA1IFG & UCRXIFG){
-        recieved[0] = UCA1RXBUF;
-
+        static int count; 
+        recieved[count] = UCA1RXBUF;
+        count++;
+        if(count == 4){
+            count = 0;
+        }
+        UCA1IFG &= ~UCRXIFG;
         //Recieve clears on its own
     }
 }
