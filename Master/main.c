@@ -10,6 +10,7 @@
     int position;
     int i, j;
     unsigned int messageSize = 4;
+    char recieved[] = "    ";
 
 int main(void) {
     // Stop watchdog timer
@@ -21,6 +22,14 @@ int main(void) {
 
     while(1)
     {
+        P3OUT = recieved[0];
+        __delay_cycles(10);
+        P5OUT = recieved[1] << 1;
+        __delay_cycles(10);
+        P6OUT = recieved[2] | (P6OUT & 0b01000000);
+        __delay_cycles(10);
+        P2OUT = recieved[3];
+        __delay_cycles(10);
     }
 }
 
@@ -80,6 +89,13 @@ __interrupt void ISR_EUSCI_A1(void){
     }
 
     if(UCA1IFG & UCRXIFG){
-        // Handle receive if needed
+        static int count; 
+        recieved[count] = UCA1RXBUF;
+        count++;
+        if(count == 4){
+            count = 0;
+        }
+        UCA1IFG &= ~UCRXIFG;
+        //Recieve clears on its own
     }
 }
