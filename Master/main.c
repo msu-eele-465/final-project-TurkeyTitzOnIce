@@ -22,7 +22,7 @@ int main(void) {
 
     while(1)
     {
-        P3OUT = recieved[0];
+        P1OUT = recieved[0] << 4;
         __delay_cycles(10);
         P5OUT = recieved[1] << 1;
         __delay_cycles(10);
