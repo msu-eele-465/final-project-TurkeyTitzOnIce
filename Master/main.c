@@ -4,6 +4,7 @@
 #include "UART.h"
 #include "heartbeat.h"
 #include "locale.h"
+#include "Keypad.h"
 
 //UART variables
     volatile char message[] = "1234";
@@ -11,6 +12,17 @@
     int i, j;
     unsigned int messageSize = 4;
     char recieved[] = "    ";
+
+    //Keypad Variables
+    unsigned int typed;
+
+//------------Functions-------------
+void tx(void){
+    position = 0;
+    UCA1IE |= UCTXIE;
+    UCA1IFG &= ~UCTXIFG;
+    UCA1TXBUF = message[position];
+}
 
 int main(void) {
     // Stop watchdog timer
@@ -30,16 +42,20 @@ int main(void) {
         __delay_cycles(10);
         P2OUT = recieved[3];
         __delay_cycles(10);
+    
+
+    typed = _read_keypad_char();
+        if(typed != 'E'){
+            static unsigned int count;
+            message[count] = typed;
+            count++;
+            while(_read_keypad_char() == typed){}  //Wait for the button to be released
+            if(count ==4){
+                count = 0;
+                tx();
+            }
+        }
     }
-}
-
-
-//------------Functions-------------
-void tx(void){
-    position = 0;
-    UCA1IE |= UCTXIE;
-    UCA1IFG &= ~UCTXIFG;
-    UCA1TXBUF = message[position];
 }
 
 
@@ -52,23 +68,6 @@ void tx(void){
 __interrupt void ISR_TB0_CCR0(void)
 {
     P6OUT ^= BIT6;
-
-    static int toggle;
-    if(toggle){
-        message[0] = '1';
-        message[1] = '2';
-        message[2] = '3';
-        message[3] = '4';
-        toggle = 0;
-    }else{
-        message[0] = '5';
-        message[1] = '6';
-        message[2] = '7';
-        message[3] = '8';
-        toggle = 1;
-    }
-
-    tx();
 }
 
 
