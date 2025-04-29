@@ -13,8 +13,20 @@
     unsigned int messageSize = 4;
     char recieved[] = "    ";
 
-    //Keypad Variables
+//Keypad Variables
     unsigned int typed;
+    
+    
+//Logic Variables and init
+    P4DIR |= BIT7;              //Turn indicator LED
+    P4OUT &= ~BIT7;
+
+    bool isTurn = true;
+    unsigned int myScore = 0;
+    unsigned int theirScore = 0;
+    unsigned int guess;
+    char fullGuess[] = "    ";
+
 
 //------------Functions-------------
 void tx(void){
@@ -22,6 +34,12 @@ void tx(void){
     UCA1IE |= UCTXIE;
     UCA1IFG &= ~UCTXIFG;
     UCA1TXBUF = message[position];
+}
+
+void check_guess(void){
+    if(fullGuess == recieved){
+        myScore++;
+    }
 }
 
 int main(void) {
@@ -32,29 +50,46 @@ int main(void) {
     hex_init();
     uart_init();
 
+    while(_read_keypad_char() != '#'){}         //Wait for Pound so signify start of game
+    message = "STRT";
+    tx();
+
     while(1)
     {
-        P1OUT = recieved[0] << 4;
-        __delay_cycles(10);
-        P5OUT = recieved[1] << 1;
-        __delay_cycles(10);
-        P6OUT = recieved[2] | (P6OUT & 0b01000000);
-        __delay_cycles(10);
-        P2OUT = recieved[3];
-        __delay_cycles(10);
     
-
-    typed = _read_keypad_char();
-        if(typed != 'E'){
-            static unsigned int count;
-            message[count] = typed;
-            count++;
-            while(_read_keypad_char() == typed){}  //Wait for the button to be released
-            if(count ==4){
-                count = 0;
-                tx();
+        if(isTurn){
+            P4OUT |= BIT7;                          //Turn On LED to signify turn
+            typed = _read_keypad_char();
+            if(typed != 'E'){
+                static unsigned int count;
+                message[count] = typed;
+                count++;
+                while(_read_keypad_char() == typed){}  //Wait for the button to be released
+                if(count ==4){
+                    count = 0;
+                    tx();
+                    isTurn = false;
+                    P4OUT &= ~BIT7;
+                }
+            }
+        }else{
+            if(recieved != "    "){
+                guess = _read_keypad_char();
+                if(guess != 'E'){
+                    static unsigned int count;
+                    fullGuess[count] = guess;
+                    count++;
+                    while(_read_keypad_char() == guess){}     //Wait for button to be released
+                    if(count == 4){
+                        count = 0;
+                        check_guess();
+                        isTurn = true;
+                    }
+                }
             }
         }
+
+        
     }
 }
 
