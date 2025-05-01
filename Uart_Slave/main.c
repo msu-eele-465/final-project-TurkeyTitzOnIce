@@ -15,6 +15,15 @@
 //Keypad Variables
     unsigned int typed;
 
+
+//----------Functions-------------
+void tx(void){
+    position = 0;
+    UCA1IE |= UCTXIE;
+    UCA1IFG &= ~UCTXIFG;
+    UCA1TXBUF = message[position];
+}
+
 int main(void) {
     // Stop watchdog timer
     WDTCTL = WDTPW | WDTHOLD;
@@ -26,17 +35,13 @@ int main(void) {
     while(1)
     {
         P1OUT = recieved[0] << 4;
-        __delay_cycles(10);
         P5OUT = recieved[1] << 1;
-        __delay_cycles(10);
         P6OUT = recieved[2] | (P6OUT & 0b01000000);
-        __delay_cycles(10);
         P2OUT = recieved[3];
-        __delay_cycles(10);
 
         typed = _read_keypad_char();
         if(typed != 'E'){
-            static int count;
+            static unsigned int count;
             message[count] = typed;
             count++;
             while(_read_keypad_char() == typed){}  //Wait for the button to be released
@@ -44,19 +49,10 @@ int main(void) {
                 count = 0;
                 tx();
             }
+            _delay_cycles(100);
         }
     }
 }
-
-//----------Functions-------------
-void tx(void){
-    position = 0;
-    UCA1IE |= UCTXIE;
-    UCA1IFG &= ~UCTXIFG;
-    UCA1TXBUF = message[position];
-}
-
-
 
 //-----------ISRs-----------------
 
