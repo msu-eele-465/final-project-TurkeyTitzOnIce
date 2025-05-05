@@ -8,6 +8,7 @@
 #include "locale.h"
 #include "Keypad.h"
 #include <string.h>  
+#include "timer.h"
 
 
 //UART variables
@@ -20,6 +21,9 @@
 //Keypad Variables
     unsigned int typed;
     
+//ADC Vars
+    unsigned int ADC_Value;
+    long int time_var;
     
 //Logic Variables and init
 
@@ -83,12 +87,32 @@ void get_input_slave(void){
     strcpy(theirInput,recieved);
 }
 
+void delay_time(void){
+    if(time_var <= 2500){
+        __delay_cycles(2500);
+    }else if(time_var > 2500 & time_var <= 5000){
+        __delay_cycles(5000);
+    }else if(time_var > 5000 & time_var <= 7500){
+        __delay_cycles(7500);
+    }else if(time_var > 7500 & time_var <= 10000){
+        __delay_cycles(10000);
+    }else if(time_var > 10000 & time_var <= 12500){
+        __delay_cycles(12500);
+    }else if(time_var > 12500 & time_var <= 17500){
+        __delay_cycles(15000);
+    }else if(time_var > 17500){
+        __delay_cycles(20000);
+    }else{
+        __delay_cycles(10000);
+    }
+}
+
 void display_code(void){
     P1OUT = recieved[0] << 4;
     P5OUT = recieved[1] << 1;
     P6OUT = recieved[2] | (P6OUT & 0b01000000);
     P2OUT = recieved[3];
-    _delay_cycles(1000000);
+    delay_time();
     clear_display();
 }
 
@@ -99,6 +123,9 @@ int main(void) {
     HeartBeat_init();
     hex_init();
     uart_init();
+    init_difficulty();
+
+    ADCCTL0 |= ADCENC | ADCSC;
 
     P4DIR |= BIT7;              //init indicator LED Master
     P4OUT &= ~BIT7;
@@ -109,6 +136,8 @@ int main(void) {
     clear_display();
     tx();
     while(_read_keypad_char() != '#'){}         //Wait for Pound so signify start of game
+    time_var = get_diff(ADC_Value);
+    ADCIE &= ~ADCIE0;                           //Disable ADC IFG
 
     while(1)
     {
@@ -118,7 +147,7 @@ int main(void) {
             get_input_master();
             strcpy(myInput, message);
             tx();
-            _delay_cycles(1000000);
+            delay_time();
             strcpy(message, "????");
             tx();
             P4OUT &= ~BIT7;
@@ -164,6 +193,8 @@ int main(void) {
                 P5OUT = 14 << 1;
                 P6OUT = 14 | (P6OUT & 0b01000000);
                 P2OUT = 14;
+                __delay_cycles(3000000);
+                clear_display();
             }
             turn = 1;
             P4OUT &= ~BIT7;
@@ -207,4 +238,12 @@ __interrupt void ISR_EUSCI_A1(void){
         UCA1IFG &= ~UCRXIFG;
         //Recieve clears on its own
     }
+}
+
+
+//ADC ISR
+#pragma vector=ADC_VECTOR
+__interrupt void ADC_ISR(void){
+    ADC_Value = ADCMEM0;
+    ADCCTL0 &= ~ADCENC;
 }
