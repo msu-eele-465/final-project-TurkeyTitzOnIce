@@ -8,6 +8,7 @@
 #include "locale.h"
 #include "Keypad.h"
 #include <string.h>  
+#include "timer.h"
 
 
 //UART variables
@@ -20,6 +21,9 @@
 //Keypad Variables
     unsigned int typed;
     
+//ADC Vars
+    unsigned int ADC_Value;
+    long int time_var;
     
 //Logic Variables and init
 
@@ -51,10 +55,10 @@ int check_guess(char ans[], char guess[]){
 }
 
 void clear_display(void){
-    P1OUT = 15 << 4;
+    P4OUT = 15 << 4;
     P5OUT = 15 << 1;
     P6OUT = 15 | (P6OUT & 0b01000000);
-    P2OUT = 15;
+    P2OUT = 15 | (P2OUT & 0b00110000);
 }
 
 void slave_display(void){
@@ -83,12 +87,33 @@ void get_input_slave(void){
     strcpy(theirInput,recieved);
 }
 
+void delay_time(void){
+    if(time_var <= 2500){
+        __delay_cycles(250000);
+    }else if(time_var > 2500 & time_var <= 5000){
+        __delay_cycles(500000);
+    }else if(time_var > 5000 & time_var <= 7500){
+        __delay_cycles(750000);
+    }else if(time_var > 7500 & time_var <= 10000){
+        __delay_cycles(1000000);
+    }else if(time_var > 10000 & time_var <= 12500){
+        __delay_cycles(1250000);
+    }else if(time_var > 12500 & time_var <= 17500){
+        __delay_cycles(1500000);
+    }else if(time_var > 17500){
+        __delay_cycles(2000000);
+    }else{
+        __delay_cycles(1000000);
+    }
+}
+
 void display_code(void){
-    P1OUT = recieved[0] << 4;
+    P4OUT = recieved[0] << 4;
     P5OUT = recieved[1] << 1;
     P6OUT = recieved[2] | (P6OUT & 0b01000000);
-    P2OUT = recieved[3];
-    _delay_cycles(1000000);
+    P2OUT = recieved[3] | (P2OUT & 0b00110000);
+    __delay_cycles(100);
+    delay_time();
     clear_display();
 }
 
@@ -99,32 +124,56 @@ int main(void) {
     HeartBeat_init();
     hex_init();
     uart_init();
+    init_difficulty();
 
-    P4DIR |= BIT7;              //init indicator LED Master
-    P4OUT &= ~BIT7;
+    P1SEL0 |= BIT2;
+    P1SEL1 |= BIT2;
 
-    P4DIR |= BIT6;              //init indicator LED Slave
-    P4OUT &= ~BIT6; 
+
+    //ADCCTL0 |= ADCENC | ADCSC;
+
+    P2DIR |= BIT5;              //init indicator LED Master
+    P2OUT &= ~BIT5;
+
+    P2DIR |= BIT4;              //init indicator LED Slave
+    P2OUT &= ~BIT4; 
 
     clear_display();
     tx();
-    while(_read_keypad_char() != '#'){}         //Wait for Pound so signify start of game
+//    while(_read_keypad_char() != '#'){}         //Wait for Pound so signify start of game
+//    time_var = get_diff(ADC_Value);
+//    ADCIE &= ~ADCIE0;                           //Disable ADC IFG
+
+    while(_read_keypad_char() != '#'){}         // Wait for Pound to signify start
+
+    P1SEL0 |= BIT2;
+    P1SEL1 |= BIT2;
+
+
+    ADCCTL0 |= ADCENC | ADCSC;                  // Start one ADC conversion
+    while (ADCCTL1 & ADCBUSY);                  // Wait for it to finish
+    ADC_Value = ADCMEM0;                        // Read result
+    ADCCTL0 &= ~ADCENC;                         // Disable ADC (optional cleanup)
+
+    time_var = get_diff(ADC_Value);             // Convert to time
+
 
     while(1)
     {
     
         if(turn == 1){
-            P4OUT |= BIT7;                          //Turn On LED to signify turn
+            P2OUT |= BIT5;                          //Turn On LED to signify turn
             get_input_master();
             strcpy(myInput, message);
             tx();
-            _delay_cycles(1000000);
+            __delay_cycles(100);
+            delay_time();
             strcpy(message, "????");
             tx();
-            P4OUT &= ~BIT7;
+            P2OUT &= ~BIT5;
             turn = 2;
         }else if(turn == 2){
-            P4OUT |= BIT6;
+            P2OUT |= BIT4;
             get_input_slave();
             if(check_guess(myInput, theirInput)){
                 theirScore++;
@@ -140,33 +189,35 @@ int main(void) {
                 strcpy(message, "????");
                 tx();
             }
-            P4OUT &= ~BIT6;
+            P2OUT &= ~BIT4;
             turn = 3;
         }else if(turn == 3){
-            P4OUT |= BIT6;
+            P2OUT |= BIT4;
             get_input_slave();
             display_code();
             turn = 4;
-            P4OUT &= ~BIT6;
+            P2OUT &= ~BIT4;
         }else if(turn == 4){
-            P4OUT |= BIT7;
+            P2OUT |= BIT5;
             get_input_master();
             if(check_guess(theirInput, message)){
                 myScore++;
-                P1OUT = 11 << 4;
+                P4OUT = 11 << 4;
                 P5OUT = 11 << 1;
                 P6OUT = 11 | (P6OUT & 0b01000000);
-                P2OUT = 11;
+                P2OUT = 11 | (P2OUT & 0b00110000);
                 __delay_cycles(3000000);
                 clear_display();
             }else{
-                P1OUT = 14 << 4;
+                P4OUT = 14 << 4;
                 P5OUT = 14 << 1;
                 P6OUT = 14 | (P6OUT & 0b01000000);
-                P2OUT = 14;
+                P2OUT = 14 | (P2OUT & 0b00110000);
+                __delay_cycles(3000000);
+                clear_display();
             }
             turn = 1;
-            P4OUT &= ~BIT7;
+            P2OUT &= ~BIT5;
         }else{}
     }
 }
@@ -179,7 +230,7 @@ int main(void) {
 //heartbeat
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void ISR_TB0_CCR0(void){
-    P6OUT ^= BIT6;
+    P1OUT ^= BIT3;
 }
 
 //UART
@@ -207,4 +258,12 @@ __interrupt void ISR_EUSCI_A1(void){
         UCA1IFG &= ~UCRXIFG;
         //Recieve clears on its own
     }
+}
+
+
+//ADC ISR
+#pragma vector=ADC_VECTOR
+__interrupt void ADC_ISR(void){
+    ADC_Value = ADCMEM0;
+    ADCCTL0 &= ~ADCENC;
 }

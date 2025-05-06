@@ -34,10 +34,10 @@ int main(void) {
 
     while(1)
     {
-        P1OUT = recieved[0] << 4;
-        P5OUT = recieved[1] << 1;
-        P6OUT = recieved[2] | (P6OUT & 0b01000000);
-        P2OUT = recieved[3];
+        P1OUT = recieved[3] << 4;
+        P5OUT = recieved[2] << 1;
+        P6OUT = recieved[1] | (P6OUT & 0b01000000);
+        P2OUT = recieved[0];
 
         typed = _read_keypad_char();
         if(typed != 'E'){

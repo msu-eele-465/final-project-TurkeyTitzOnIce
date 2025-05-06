@@ -2,17 +2,17 @@ void hex_init(void){
 
 
     //HEX Display 1
-    P1DIR |= BIT4;
-    P1OUT |= BIT4;
+    P4DIR |= BIT4;
+    P4OUT |= BIT4;
 
-    P1DIR |= BIT5;
-    P1OUT &= ~BIT5;
+    P4DIR |= BIT5;
+    P4OUT &= ~BIT5;
 
-    P1DIR |= BIT6;
-    P1OUT |= BIT6;
+    P4DIR |= BIT6;
+    P4OUT |= BIT6;
 
-    P1DIR |= BIT7;
-    P1OUT &= ~BIT7;
+    P4DIR |= BIT7;
+    P4OUT &= ~BIT7;
 
     //HEX Display 2
     P5DIR |= BIT1;
