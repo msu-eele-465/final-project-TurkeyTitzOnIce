@@ -55,8 +55,8 @@ int main(void)
     UCB0BRW = 10;                          // Doesn't really matter in slave
 
     // Configure SPI Pins
-    P1SEL0 |= BIT3 | BIT1 | BIT2;
-    P1SEL1 &= ~(BIT3 | BIT1 | BIT2);
+    P1SEL0 |= BIT1 | BIT2;
+    P1SEL1 &= ~(BIT1 | BIT2);
 
     UCB0IE |= UCRXIE;                      // Enable RX interrupt
 
