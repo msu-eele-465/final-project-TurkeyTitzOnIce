@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Master",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "Master",
+                "resourceId": "/Master"
+            }
+        },
+        {
+            "name": "Uart_Slave",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "Uart_Slave",
+                "resourceId": "/Uart_Slave"
+            }
+        },
+        {
+            "name": "SPI_Slave",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "SPI_Slave",
+                "resourceId": "/SPI_Slave"
+            }
+        }
+    ]
+}
