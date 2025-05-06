@@ -18,6 +18,15 @@
                 "name": "Uart_Slave",
                 "resourceId": "/Uart_Slave"
             }
+        },
+        {
+            "name": "SPI_Slave",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "SPI_Slave",
+                "resourceId": "/SPI_Slave"
+            }
         }
     ]
 }

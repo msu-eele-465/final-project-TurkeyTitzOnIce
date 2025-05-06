@@ -9,6 +9,7 @@
 #include "Keypad.h"
 #include <string.h>  
 #include "timer.h"
+#include "spi.h"
 
 
 //UART variables
@@ -125,6 +126,7 @@ int main(void) {
     hex_init();
     uart_init();
     init_difficulty();
+    init_spi();
 
     P1SEL0 |= BIT2;
     P1SEL1 |= BIT2;
@@ -160,7 +162,8 @@ int main(void) {
 
     while(1)
     {
-    
+
+        //Game logic
         if(turn == 1){
             P2OUT |= BIT5;                          //Turn On LED to signify turn
             get_input_master();
@@ -176,13 +179,13 @@ int main(void) {
             P2OUT |= BIT4;
             get_input_slave();
             if(check_guess(myInput, theirInput)){
-                theirScore++;
                 strcpy(message, ";;;;");
                 tx();
                 __delay_cycles(3000000);
                 strcpy(message, "????");
                 tx();
             }else{
+                myScore++;
                 strcpy(message, "....");
                 tx();
                 __delay_cycles(3000000);
@@ -201,7 +204,6 @@ int main(void) {
             P2OUT |= BIT5;
             get_input_master();
             if(check_guess(theirInput, message)){
-                myScore++;
                 P4OUT = 11 << 4;
                 P5OUT = 11 << 1;
                 P6OUT = 11 | (P6OUT & 0b01000000);
@@ -209,6 +211,7 @@ int main(void) {
                 __delay_cycles(3000000);
                 clear_display();
             }else{
+                theirScore++;
                 P4OUT = 14 << 4;
                 P5OUT = 14 << 1;
                 P6OUT = 14 | (P6OUT & 0b01000000);
@@ -219,6 +222,30 @@ int main(void) {
             turn = 1;
             P2OUT &= ~BIT5;
         }else{}
+
+
+        __delay_cycles(1000);
+        //score transmition
+        uint8_t result = 0;
+
+        int i;
+        for (i = 0; i < myScore; i++) {
+            result |= (1 << (7 - i));
+            __delay_cycles(10);
+        }
+
+        for (i = 0; i < theirScore; i++) {
+            result |= (1 << i);
+            __delay_cycles(10);
+        }
+
+        UCA0TXBUF = result;
+        __delay_cycles(1000);
+
+
+        if(myScore == 4 | theirScore == 4){
+            return 0;
+        }
     }
 }
 
