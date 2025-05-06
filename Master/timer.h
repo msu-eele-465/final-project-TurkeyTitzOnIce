@@ -4,37 +4,35 @@
 #include <stdbool.h>
 #include "math.h"
 
-char celcius;
-int thousands;
-int hundreds;
-int tens;
-int ones;
-
 void init_difficulty(void){
-    P1SEL1 |= BIT0;
-    P1SEL0 |= BIT0;
+    PM5CTL0 &= ~LOCKLPM5;           // Unlock GPIO
 
-    PM5CTL0 &= ~LOCKLPM5;
+    // Set P1.1 to analog mode (A0)
+    P1SEL0 |= BIT2;
+    P1SEL1 |= BIT2;
 
-    ADCCTL0 &= ~ADCSHT;
-    ADCCTL0 |= ADCSHT_2;
-    ADCCTL0 |= ADCON;
+    // ADC config
+    ADCCTL0 = ADCSHT_2 | ADCON;     // 16-cycle sample, ADC on
+    ADCCTL1 = ADCSSEL_2 | ADCSHP;   // SMCLK, pulse sample mode
+    ADCCTL2 = ADCRES_2;             // 12-bit resolution
+    ADCMCTL0 = ADCINCH_2;           // A0 = P1.1 input
 
-    ADCCTL1 |= ADCSSEL_2;
-    ADCCTL1 |= ADCSHP;
-
-    ADCCTL2 &= ~ADCRES;
-    ADCCTL2 |= ADCRES_2;
-
-    ADCMCTL0 |= ADCINCH_5;
-
-    ADCIE |= ADCIE0;
+    ADCIE |= ADCIE0;                // Enable interrupt (optional)
 }
 
-long int get_diff(int ADC_Value){
-    double volts = ((double)ADC_Value / 4096) * 3.3;
 
-    double time = volts * 5555;
+long get_diff(int ADC_Value) {
+    int bucket = (ADC_Value * 7) / 4096;
 
-    return (long int)time;
+    switch (bucket) {
+        case 0: return 2500;
+        case 1: return 5000;
+        case 2: return 7500;
+        case 3: return 10000;
+        case 4: return 12500;
+        case 5: return 15000;
+        case 6: return 20000;
+        default: return 10000;  // safety fallback
+    }
 }
+

@@ -6,8 +6,8 @@ HeartBeat_init(){
     PM5CTL0 &= ~LOCKLPM5;                   // Disable the GPIO power-on default high-impedance mdoe to activate
 
     // init heartbeat LED
-    P6DIR |= BIT6;
-    P6OUT &= ~BIT6;
+    P1DIR |= BIT3;
+    P1OUT &= ~BIT3;
 
     TB0CTL |= TBSSEL__ACLK | ID__1 | MC__UP | TBCLR;
 
